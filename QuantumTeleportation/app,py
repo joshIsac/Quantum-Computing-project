@@ -1,0 +1,51 @@
+from flask import Flask ,request,jsonify,render_template
+from qiskit import QuantumCircuit,QuantumRegister,ClassicalRegister
+from qiskit_aer import AerSimulator
+from qiskit.quantum_info import Statevector
+from qiskit.visualization import plot_histogram
+
+app=Flask(__name__)
+
+@app.route('/')
+def Home():
+    return render_template('index.html')
+
+@app.route('/teleport', methods=['POST'])
+def Teleport():
+    # Get the input from the form
+    data=request.json
+    theta, phi = data.get("theta"), data.get("phi")
+
+    
+    
+    # Initialize the qubit state |ψ⟩
+    initial_state = Statevector.from_label('0').evolve(QuantumCircuit(1).ry(theta, 0).rz(phi, 0))
+    
+    # Quantum Circuit for Teleportation
+    qr = QuantumRegister(3)
+    cr = ClassicalRegister(2)
+    circuit = QuantumCircuit(qr, cr)
+
+    # Set up teleportation
+    circuit.initialize(initial_state.data, [qr[0]])  # Qubit 0 is Alice's state
+    circuit.h(qr[1])
+    circuit.cx(qr[1], qr[2])
+    circuit.cx(qr[0], qr[1])
+    circuit.h(qr[0])
+    circuit.measure([qr[0], qr[1]], [cr[0], cr[1]])
+    circuit.z(qr[2]).c_if(cr, 1)
+    circuit.x(qr[2]).c_if(cr, 2)
+
+    # Run the circuit on a simulator
+    simulator=AerSimulator()
+    result = simulator.run(circuit).result()
+    counts = result.get_counts()
+
+    final_state=Statevector(result.get_statevector(circuit))
+
+    return jsonify({"final_state": final_state.data.tolist()})
+
+if __name__=="__main__":
+    app.run(debug=True)
+
+    

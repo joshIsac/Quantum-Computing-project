@@ -1,0 +1,49 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Teleportation Simulator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Quantum Teleportation Simulator</h1>
+        <div class="input-container">
+            <label for="theta">Theta (θ):</label>
+            <input type="number" id="theta" step="0.01" placeholder="e.g., 1.57">
+
+            <label for="phi">Phi (φ):</label>
+            <input type="number" id="phi" step="0.01" placeholder="e.g., 0">
+        </div>
+        
+        <button onclick="teleport()">Teleport Qubit</button>
+
+        <div class="result-container">
+            <h2>Final State after Teleportation:</h2>
+            <div id="result">Awaiting teleportation...</div>
+        </div>
+    </div>
+
+    <script>
+        async function teleport() {
+            const theta = parseFloat(document.getElementById("theta").value);
+            const phi = parseFloat(document.getElementById("phi").value);
+            if (isNaN(theta) || isNaN(phi)) {
+                alert("Please enter valid theta and phi values.");
+                return;
+            }
+
+            const response = await fetch('/teleport', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ theta, phi })
+            });
+            
+            const data = await response.json();
+            document.getElementById("result").innerText = `Final state vector: ${JSON.stringify(data.final_state)}`;
+        }
+    </script>
+</body>
+</html>
