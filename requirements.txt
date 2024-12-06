@@ -4,3 +4,5 @@ qiskit_aer
 Flask
 google-api-python-client
 qiskit_machine_learning
+pennylane
+pennylane-qiskit
