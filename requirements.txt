@@ -2,3 +2,6 @@ pygame
 qiskit
 qiskit_aer
 Flask
+google-api-python-client
+qiskit_machine_learning
+qiskit-optimization
